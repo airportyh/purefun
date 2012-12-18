@@ -1,0 +1,12 @@
+src_files:
+- "*.js"
+- "*.coffee"
+- "run"
+launchers:
+    run:
+        command: ./run
+        protocol: tap
+launch_in_dev:
+- run
+launch_in_ci:
+- run
