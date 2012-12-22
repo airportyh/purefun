@@ -1,0 +1,22 @@
+{
+  "name": "purefun",
+  "version": "0.0.0",
+  "description": "Small and practical functional programming library for Javascript.",
+  "main": "purefun.js",
+  "scripts": {
+    "test": "node jsdoctest.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/airportyh/purefun.git"
+  },
+  "keywords": [
+    "functional"
+  ],
+  "author": "Toby Ho",
+  "license": "MIT",
+  "dependencies": {
+    "markdown": "~0.4.0",
+    "esprima": "~1.0.2"
+  }
+}

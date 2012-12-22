@@ -1,6 +1,5 @@
 src_files:
 - "*.js"
-- "*.coffee"
 - "run"
 launchers:
     run:

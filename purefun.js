@@ -1,9 +1,3 @@
-if (typeof describe !== 'undefined'){
-    var expect = require('chai').expect
-}else{
-    var describe = function(){}
-}
-
 // Objects and Arrays
 // =====================
 
@@ -225,24 +219,22 @@ function head(arr){
     return arr[0]
 }
 
-describe('filter', function(){ 
-    it('filters an array based on a conditional', function(){
-        expect(filter(odd, [1,2,3])).to.deep.equal([1,3])
-    })
-    it('works for objects too', function(){
-        expect(filter(odd, {one: 1, two: 2, three: 3})).to.deep.equal([1,3])
-    })
-    function odd(n){
-        return eq(1, mod(n, 2))
-    }
-})
-
 /*
 
 filter(fun, arr)
 ----------------
 
+Filters arrays
 
+    > function odd(n){ return eq(1, mod(n, 2)) }
+    > filter(odd, [1,2,3])
+    [1,3]
+
+Works for objects too
+
+    > function odd(n){ return eq(1, mod(n, 2)) }
+    > filter(odd, {one: 1, two: 2, three: 3})
+    [1, 3]
 
 */
 exports.filter = filter
@@ -250,43 +242,78 @@ function filter(fun, arr){
     return map(id, arr).filter(fun)
 }
 
-describe('take', function(){
-    it('takes first n elements of array', function(){
-        expect(take(n = 2, [1,2,3])).to.deep.equal([1,2])
-    })
-    it('is returns same array if n > length(arr)', function(){
-        expect(take(n = 5, [1,2,3])).to.deep.equal([1,2,3])
-    })
-    it('works for function arguments', function(){
-        function f(){
-            return take(n = 2, arguments)
-        }
-        expect(f(1,2,3)).to.deep.equal([1,2])
-    })
-    var n
-})
+/*
+
+take(n:Number, arr:Array) => Array
+----------------------------------
+
+Return the first `n` elements of `arr`.
+
+Takes first n elements of array
+
+    > take(2, [1,2,3])
+    [1, 2]
+
+Returns same array if n > length(arr)
+
+    > take(5, [1,2,3])
+    [1,2,3]
+
+Works for function arguments
+
+    > function f(){
+    ... return take(2, arguments)
+    ... }
+    > f(1,2,3)
+    [1,2]
+
+*/
 exports.take = take
 function take(n, arr){
     return map(id, arr).slice(0, n)
 }
 
+/*
 
+isArray(obj) => Boolean
+-----------------------
+
+Tells whether a thing is an array.
+
+Is array
+
+    > isArray([])
+    true
+
+Is not array
+
+    > isArray(1)
+    false
+
+*/
+
+exports.isArray = isArray
+function isArray(obj){
+    return Array.isArray(obj)
+}
 
 // Functions
 // =========
 
-describe('compose', function(){
-    it('can compose', function(){
-        function times2(n){
-            return n * 2
-        }
-        function add3(n){
-            return n + 3
-        }
-        var f = compose(times2, add3)
-        expect(f(3)).to.equal(9)
-    })
-})
+/*
+
+compose(f:Function, g:Function) => Function
+-------------------------------------------
+
+Composes any number of functions by chaining them together.
+
+    > function times2(n){ return n * 2 }
+    > function add3(n){ return n + 3 }
+    > var f = compose(times2, add3)
+    > f(3)
+    9
+
+*/
 exports.compose = compose
 function compose(f, g){
     return function(){
@@ -294,6 +321,18 @@ function compose(f, g){
     }
 }
 
+/*
+
+curry(fun:Function, fixargs...) => Function
+----------------------------------------
+
+Returns a new function which the first n args where `n` is the length of `fixargs`.
+
+    > var add1 = curry(add, 1)
+    > add1(2)
+    3
+
+*/
 exports.curry = curry
 function curry(fun){
     var fixargs = tail(arguments)
@@ -301,21 +340,18 @@ function curry(fun){
         return apply(fun, concat(fixargs, arguments))
     }
 }
-describe('curry', function(){
-    it('can curry one argument', function(){
-        function add(x, y){
-            return x + y
-        }
-        var add1 = curry(add, 1)
-        expect(add1(2)).to.equal(3)
-    })
-})
 
-describe('apply', function(){
-    it('applys arguments to a function', function(){
-        expect(apply(add, [1, 2])).to.equal(3)
-    })
-})
+/*
+
+apply(fun:Function, args:Array) => Anything
+----------------------------------------
+
+Applies a function to an array of arguments.
+
+    > apply(add, [1,2])
+    3
+
+*/
 exports.apply = apply
 function apply(fun, args){
     return fun.apply(null, args)
@@ -324,39 +360,87 @@ function apply(fun, args){
 // Operators
 // =========
 
-describe('operators', function(){
-    it('adds', function(){
-        expect(add(1,2)).to.equal(3)
-    })
-    it('eq gives strict equality', function(){
-        expect(eq(1,1)).to.be.ok
-        expect(eq(1,'1')).not.to.be.ok
-    })
-})
-
 // Define matching functions for binary operators
-'\
-add:+ \
-eq:=== \
-gt:> \
-gte:>= \
-lt:< \
-lte:<= \
-mod:%\
-'.split(' ').forEach(function(def){
-    var pair = def.split(':')
-    var name = pair[0]
-    var op = pair[1]
-    exports[name] = global[name] = new Function('x', 'y', 'return x' + op + 'y')
-})
+
+/*
+
+op(operator)
+------------
+
+Returns a function that represents the binary operator.
+
+Add
+
+    > op('+')(1, 2)
+    3
+
+Subtract
+
+    > op('-')(2, 1)
+    1
+
+Strict equal
+
+    > op('===')({}, {})
+    false
+
+*/
+
+exports.op = op
+function op(op){
+    return new Function('x', 'y', 'return x' + op + 'y')
+}
+
+
+/*
+
+eq(one, other)
+--------------
+
+Alias for op('===').
+
+*/
+var eq = exports.eq = op('===')
+
+/*
+
+add(x, y)
+---------
+
+Alias for op('+').
+
+*/
+var add = exports.add = op('+')
+
+/*
+
+mod(one, other)
+---------------
+
+Alias for op('%')
+
+*/
+var mod = exports.mod = op('%')
 
 // Strings
 // =======
 
+/*
+
+split(sep:String, str:String) => Array (of Strings)
+---------------------------------------------------
+
+Splits `str` on the string separator `sep` into an array of strings.
+
+    > split(',', 'a,b,c,d')
+    ['a','b','c','d']
+
+*/
 exports.split = split
 function split(sep, str){
     return str.split(sep)
 }
+
 
 exports.extend = extend
 function extend(obj){
@@ -365,12 +449,25 @@ function extend(obj){
     }
 }
 
-exports.isstr = isstr
-function isstr(obj){
-    return typeof obj === 'string'
-}
+/*
 
-exports.trim = trim
-function trim(str){
-    return str.trim()
+isString(obj) => true
+---------------------
+
+Tells whether a thing is a string
+
+Is a string
+
+    > isString('abc')
+    true
+
+not a string
+    
+    > isString(3)
+    false
+
+*/
+exports.isString = isString
+function isString(obj){
+    return typeof obj === 'string'
 }
